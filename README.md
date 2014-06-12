@@ -1,3 +1,5 @@
+Modified the GSM/GPRS & GPS Shield Library for modules using SIM900/SIM908 to remove functionality not needed for our application. In particular, references to sms and calling have been removed.
+
 GSM/GPRS & GPS Shield Library for modules using SIM900/SIM908
 ======
 NOTE: This repo has been migrated from google code repo: http://code.google.com/p/gsm-shield-arduino/
