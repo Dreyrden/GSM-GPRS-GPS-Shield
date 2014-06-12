@@ -15,7 +15,6 @@ based on QuectelM10 chip.
 */
 
 #include "GSM.h"
-#include "WideTextFinder.h"
 
 //De-comment this two lines below if you have the
 //first version of GSM GPRS Shield
@@ -27,31 +26,19 @@ based on QuectelM10 chip.
 #define _GSM_TXPIN_ 2
 #define _GSM_RXPIN_ 3
 
-#ifdef UNO
-GSM::GSM():_cell(_GSM_TXPIN_,_GSM_RXPIN_),_tf(_cell, 10),_status(IDLE)
-{
-};
-#endif
 #ifdef MEGA
-GSM::GSM()
-{
-     _cell.begin(9600);
-};
+     GSM::GSM()
+     {
+          _cell.begin(9600);
+     };
 #endif
 
 
-int GSM::begin(long baud_rate)
-{
-	 // Set pin modes
-	 pinMode(GSM_ON,OUTPUT);
-	 pinMode(GSM_RESET,OUTPUT);
+int GSM::begin(long baud_rate) {
+	// Set pin modes
+	pinMode(GSM_ON,OUTPUT);
+	pinMode(GSM_RESET,OUTPUT);
 
-#ifdef UNO
-     if (baud_rate==115200) {
-          Serial.println(F("Don't use baudrate 115200 with Software Serial.\nAutomatically changed at 9600."));
-          baud_rate=9600;
-     }
-#endif
      int response=-1;
      int cont=0;
      boolean norep=true;
@@ -65,9 +52,9 @@ int GSM::begin(long baud_rate)
      for (cont=0; cont<3; cont++) {
           if (AT_RESP_ERR_NO_RESP == SendATCmdWaitResp(str_at, 500, 100, str_ok, 5)&&!turnedON) {		//check power
                // there is no response => turn on the module
-#ifdef DEBUG_ON
-               Serial.println(F("DB:NO RESP"));
-#endif
+               #ifdef DEBUG_ON
+                    Serial.println(F("DB:NO RESP"));
+               #endif
                // generate turn on pulse
                digitalWrite(GSM_ON, HIGH);
                delay(1200);
@@ -75,79 +62,79 @@ int GSM::begin(long baud_rate)
                delay(10000);
                WaitResp(1000, 1000);
           } else {
-#ifdef DEBUG_ON
-               Serial.println(F("DB:ELSE"));
-#endif
+               #ifdef DEBUG_ON
+                    Serial.println(F("DB:ELSE"));
+               #endif
                WaitResp(1000, 1000);
           }
      }
 
 
      if (AT_RESP_OK == SendATCmdWaitResp(str_at, 500, 100, str_ok, 5)) {
-#ifdef DEBUG_ON
-          Serial.println(F("DB:CORRECT BR"));
-#endif
+          #ifdef DEBUG_ON
+               Serial.println(F("DB:CORRECT BR"));
+          #endif
           turnedON=true;
           norep=false;
      }
 
 
      if (AT_RESP_ERR_DIF_RESP == SendATCmdWaitResp(str_at, 500, 100, str_ok, 5)&&!turnedON) {		//check OK
-#ifdef DEBUG_ON
-          Serial.println(F("DB:AUTO BAUD RATE"));
-#endif
+          #ifdef DEBUG_ON
+               Serial.println(F("DB:AUTO BAUD RATE"));
+          #endif
           for (int i=0; i<8; i++) {
                switch (i) {
-               case 0:
-                    _cell.begin(1200);
-                    break;
-
-               case 1:
-                    _cell.begin(2400);
-                    break;
-
-               case 2:
-                    _cell.begin(4800);
-                    break;
-
-               case 3:
-                    _cell.begin(9600);
-                    break;
-
-               case 4:
-                    _cell.begin(19200);
-                    break;
-
-               case 5:
-                    _cell.begin(38400);
-                    break;
-
-               case 6:
-                    _cell.begin(57600);
-                    break;
-
-               case 7:
-                    _cell.begin(115200);
-                    break;
-
-                    // if nothing else matches, do the default
-                    // default is optional
+                    case 0:
+                         _cell.begin(1200);
+                         break;
+     
+                    case 1:
+                         _cell.begin(2400);
+                         break;
+     
+                    case 2:
+                         _cell.begin(4800);
+                         break;
+     
+                    case 3:
+                         _cell.begin(9600);
+                         break;
+     
+                    case 4:
+                         _cell.begin(19200);
+                         break;
+     
+                    case 5:
+                         _cell.begin(38400);
+                         break;
+     
+                    case 6:
+                         _cell.begin(57600);
+                         break;
+     
+                    case 7:
+                         _cell.begin(115200);
+                         break;
+     
+                         // if nothing else matches, do the default
+                         // default is optional
                }
 
                delay(100);
 
-#ifdef DEBUG_PRINT
-               // parameter 0 - because module is off so it is not necessary
-               // to send finish AT<CR> here
-               DebugPrint(F("DEBUG: Stringa "), 0);
-               DebugPrint(buff, 0);
-#endif
+               #ifdef DEBUG_PRINT
+                    // parameter 0 - because module is off so it is not necessary
+                    // to send finish AT<CR> here
+                    DebugPrint(F("DEBUG: Stringa "), 0);
+                    DebugPrint(buff, 0);
+               #endif
 
 
                if (AT_RESP_OK == SendATCmdWaitResp(str_at, 500, 100, str_ok, 5)) {
-#ifdef DEBUG_ON
-                    Serial.println(F("DB:FOUND PREV BR"));
-#endif
+                    #ifdef DEBUG_ON
+                         Serial.println(F("DB:FOUND PREV BR"));
+                    #endif
                     _cell.print("AT+IPR=");
                     _cell.print(baud_rate);
                     _cell.print("\r"); // send <CR>
@@ -155,16 +142,16 @@ int GSM::begin(long baud_rate)
                     _cell.begin(baud_rate);
                     delay(100);
                     if (AT_RESP_OK == SendATCmdWaitResp(str_at, 500, 100, str_ok, 5)) {
-#ifdef DEBUG_ON
-                         Serial.println(F("DB:OK BR"));
-#endif
+                         #ifdef DEBUG_ON
+                              Serial.println(F("DB:OK BR"));
+                         #endif
                     }
                     turnedON=true;
                     break;
                }
-#ifdef DEBUG_ON
-               Serial.println(F("DB:NO BR"));
-#endif
+               #ifdef DEBUG_ON
+                    Serial.println(F("DB:NO BR"));
+               #endif
           }
           // communication line is not used yet = free
           SetCommLineStatus(CLS_FREE);
@@ -176,109 +163,109 @@ int GSM::begin(long baud_rate)
           Serial.println(F("Trying to force the baud-rate to 9600\n"));
           for (int i=0; i<8; i++) {
                switch (i) {
-               case 0:
-                    _cell.begin(1200);
-                    delay(1000);
-                    Serial.println(F("1200"));
-                    _cell.print(F("AT+IPR=9600\r"));
-                    delay(1000);
-                    _cell.begin(9600);
-                    delay(1000);
-                    SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
-                    delay(1000);
-                    WaitResp(1000,1000);
-                    break;
-
-               case 1:
-                    _cell.begin(2400);
-                    delay(1000);
-                    Serial.println(F("2400"));
-                    _cell.print(F("AT+IPR=9600\r"));
-                    delay(1000);
-                    _cell.begin(9600);
-                    delay(1000);
-                    SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
-                    delay(1000);
-                    WaitResp(1000,1000);
-                    break;
-
-               case 2:
-                    _cell.begin(4800);
-                    delay(1000);
-                    Serial.println(F("4800"));
-                    _cell.print(F("AT+IPR=9600\r"));
-                    delay(1000);
-                    _cell.begin(9600);
-                    delay(1000);
-                    SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
-                    delay(1000);
-                    WaitResp(1000,1000);
-                    break;
-
-               case 3:
-                    _cell.begin(9600);
-                    delay(1000);
-                    Serial.println(F("9600"));
-                    _cell.print(F("AT+IPR=9600\r"));
-                    delay(1000);
-                    _cell.begin(9600);
-                    delay(1000);
-                    SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
-                    delay(1000);
-                    WaitResp(1000,1000);
-                    break;
-
-               case 4:
-                    _cell.begin(19200);
-                    delay(1000);
-                    Serial.println(F("19200"));
-                    _cell.print(F("AT+IPR=9600\r"));
-                    delay(1000);
-                    _cell.begin(9600);
-                    delay(1000);
-                    SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
-                    delay(1000);
-                    WaitResp(1000,1000);
-                    break;
-
-               case 5:
-                    _cell.begin(38400);
-                    delay(1000);
-                    Serial.println(F("38400"));
-                    _cell.print(F("AT+IPR=9600\r"));
-                    delay(1000);
-                    _cell.begin(9600);
-                    delay(1000);
-                    SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
-                    delay(1000);
-                    WaitResp(1000,1000);
-                    break;
-
-               case 6:
-                    _cell.begin(57600);
-                    delay(1000);
-                    Serial.println(F("57600"));
-                    _cell.print(F("AT+IPR=9600\r"));
-                    delay(1000);
-                    _cell.begin(9600);
-                    delay(1000);
-                    SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
-                    delay(1000);
-                    WaitResp(1000,1000);
-                    break;
-
-               case 7:
-                    _cell.begin(115200);
-                    delay(1000);
-                    Serial.println(F("115200"));
-                    _cell.print(F("AT+IPR=9600\r"));
-                    delay(1000);
-                    _cell.begin(9600);
-                    delay(1000);
-                    SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
-                    delay(1000);
-                    WaitResp(1000,1000);
-                    break;
+                    case 0:
+                         _cell.begin(1200);
+                         delay(1000);
+                         Serial.println(F("1200"));
+                         _cell.print(F("AT+IPR=9600\r"));
+                         delay(1000);
+                         _cell.begin(9600);
+                         delay(1000);
+                         SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
+                         delay(1000);
+                         WaitResp(1000,1000);
+                         break;
+     
+                    case 1:
+                         _cell.begin(2400);
+                         delay(1000);
+                         Serial.println(F("2400"));
+                         _cell.print(F("AT+IPR=9600\r"));
+                         delay(1000);
+                         _cell.begin(9600);
+                         delay(1000);
+                         SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
+                         delay(1000);
+                         WaitResp(1000,1000);
+                         break;
+     
+                    case 2:
+                         _cell.begin(4800);
+                         delay(1000);
+                         Serial.println(F("4800"));
+                         _cell.print(F("AT+IPR=9600\r"));
+                         delay(1000);
+                         _cell.begin(9600);
+                         delay(1000);
+                         SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
+                         delay(1000);
+                         WaitResp(1000,1000);
+                         break;
+     
+                    case 3:
+                         _cell.begin(9600);
+                         delay(1000);
+                         Serial.println(F("9600"));
+                         _cell.print(F("AT+IPR=9600\r"));
+                         delay(1000);
+                         _cell.begin(9600);
+                         delay(1000);
+                         SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
+                         delay(1000);
+                         WaitResp(1000,1000);
+                         break;
+     
+                    case 4:
+                         _cell.begin(19200);
+                         delay(1000);
+                         Serial.println(F("19200"));
+                         _cell.print(F("AT+IPR=9600\r"));
+                         delay(1000);
+                         _cell.begin(9600);
+                         delay(1000);
+                         SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
+                         delay(1000);
+                         WaitResp(1000,1000);
+                         break;
+     
+                    case 5:
+                         _cell.begin(38400);
+                         delay(1000);
+                         Serial.println(F("38400"));
+                         _cell.print(F("AT+IPR=9600\r"));
+                         delay(1000);
+                         _cell.begin(9600);
+                         delay(1000);
+                         SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
+                         delay(1000);
+                         WaitResp(1000,1000);
+                         break;
+     
+                    case 6:
+                         _cell.begin(57600);
+                         delay(1000);
+                         Serial.println(F("57600"));
+                         _cell.print(F("AT+IPR=9600\r"));
+                         delay(1000);
+                         _cell.begin(9600);
+                         delay(1000);
+                         SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
+                         delay(1000);
+                         WaitResp(1000,1000);
+                         break;
+     
+                    case 7:
+                         _cell.begin(115200);
+                         delay(1000);
+                         Serial.println(F("115200"));
+                         _cell.print(F("AT+IPR=9600\r"));
+                         delay(1000);
+                         _cell.begin(9600);
+                         delay(1000);
+                         SendATCmdWaitResp(str_at, 500, 100, str_ok, 5);
+                         delay(1000);
+                         WaitResp(1000,1000);
+                         break;
                }
           }
 
@@ -312,8 +299,7 @@ int GSM::begin(long baud_rate)
 }
 
 
-void GSM::InitParam(byte group)
-{
+void GSM::InitParam(byte group) {
      switch (group) {
      case PARAM_SET_0:
           // check comm line
@@ -369,7 +355,6 @@ void GSM::InitParam(byte group)
           // select speaker volume (0 to 14)
           //SetSpeakerVolume(9);
           // init SMS storage
-          InitSMSMemory();
           // select phonebook memory storage
           SendATCmdWaitResp(F("AT+CPBS=\"SM\""), 1000, 50, str_ok, 5);
           SendATCmdWaitResp(F("AT+CIPSHUT"), 500, 50, "SHUT OK", 5);
@@ -378,7 +363,7 @@ void GSM::InitParam(byte group)
 }
 
 byte GSM::WaitResp(uint16_t start_comm_tmout, uint16_t max_interchar_tmout,
-                   char const *expected_resp_string)
+                   char const *expected_resp_string) 
 {
      byte status;
      byte ret_val;
@@ -699,28 +684,6 @@ void GSM::Echo(byte state)
           delay(500);
           SetCommLineStatus(CLS_FREE);
      }
-}
-
-char GSM::InitSMSMemory(void)
-{
-     char ret_val = -1;
-
-     if (CLS_FREE != GetCommLineStatus()) return (ret_val);
-     SetCommLineStatus(CLS_ATCMD);
-     ret_val = 0; // not initialized yet
-
-     // Disable messages about new SMS from the GSM module
-     SendATCmdWaitResp(F("AT+CNMI=2,0"), 1000, 50, str_ok, 2);
-
-     // send AT command to init memory for SMS in the SIM card
-     // response:
-     // +CPMS: <usedr>,<totalr>,<usedw>,<totalw>,<useds>,<totals>
-     if (AT_RESP_OK == SendATCmdWaitResp(F("AT+CPMS=\"SM\",\"SM\",\"SM\""), 1000, 1000, "+CPMS:", 10)) {
-          ret_val = 1;
-     } else ret_val = 0;
-
-     SetCommLineStatus(CLS_FREE);
-     return (ret_val);
 }
 
 int GSM::isIP(const char* cadena)
